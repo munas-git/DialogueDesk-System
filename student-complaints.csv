@@ -1,0 +1,109 @@
+complaint_id,complaint_text,date,time
+9276eb56-c48b-4f17-a6d8-6976e1d52bcb,Water pressure in Block C showers has been extremely low for the past week.,2024-01-15,08:23:15
+1e2ac7d0-2401-4538-a494-d06cf913dacc,Cafeteria food prices increased by 30% without any prior notice.,2024-01-15,09:45:22
+e08769fb-2ca6-40dd-a9a5-fae04ad26a0d,Room heating system in dormitory B hasn't worked for three days.,2024-01-15,12:30:45
+e7b86638-f088-4569-9c99-3d2dcdc9552e,No hot water in East Wing bathrooms since yesterday morning.,2024-01-15,14:20:18
+25b4ef17-ff3b-4b14-85b9-a72e4de8bf14,Wifi connection keeps dropping during online classes.,2024-01-15,16:55:33
+b87f7b18-3da2-4156-9f78-8862b4ed2b39,Study room lights in library second floor need replacement.,2024-01-15,18:10:42
+fac2975a-6431-47d7-8913-af85c497167e,Laundry machine on floor 3 has been out of order for two weeks.,2024-01-15,19:25:11
+554348bb-2e48-41d6-a5b7-c3de1c8ad1f4,Air conditioning in lecture hall 105 is too cold.,2024-01-16,08:15:27
+65d1d6ee-d84b-46a3-9e95-878323de6a38,Elevator in Building D has been broken since Monday.,2024-01-16,09:30:44
+1f1116fe-2b11-413b-a3a7-8ed5272effde,Vending machine in science block taking money without dispensing drinks.,2024-01-16,10:45:19
+df3a52af-3c9f-4154-8cdc-187b18661922,Need more vegetarian options in the cafeteria menu.,2024-01-16,11:50:23
+07770178-2604-4fc0-ad0b-9549365bfa65,Library closing too early during exam week.,2024-01-16,13:25:37
+5f2b39fb-5782-433b-b54d-17d85b4519f2,Water fountain near gym dispenses warm water.,2024-01-16,14:40:51
+a216b13b-a6c2-4e22-9b1d-360051a9f70c,Bathroom sink in Block A leaking continuously.,2024-01-16,15:55:14
+07c36db7-5b90-415f-9877-57fc86b358ec,Common room furniture needs urgent replacement.,2024-01-16,16:30:28
+ffa8cfdb-9282-4cd6-ac4b-49852d4a26b7,Print station in library constantly running out of paper.,2024-01-16,17:45:33
+4f149177-c03f-4f43-a455-dc462f9ca86c,Campus shuttle bus running behind schedule every morning.,2024-01-16,18:20:47
+1490d50e-2abc-4326-9f27-43ff60dc09e4,Gym equipment maintenance required - treadmill making weird noises.,2024-01-16,19:35:52
+d7a726ff-02f1-4082-818d-3285a7921584,Need more power outlets in study areas.,2024-01-17,08:10:16
+61490d63-462b-47d3-9974-38a1899b58e8,Food serving portions have become smaller but prices remain high.,2024-01-17,09:25:31
+04de90b6-b777-49ac-9219-7b4af52232fa,Dormitory internet speed extremely slow during peak hours.,2024-01-17,10:40:45
+133c7054-dbf0-4628-9d1e-ac0564033eb6,Water dispenser in science building not working properly.,2024-01-17,11:55:59
+8cd01650-fc98-47cb-9283-61ab21ca050d,Study room booking system keeps crashing.,2024-01-17,13:10:14
+ddfe7059-2953-4db7-8dc9-7872857f779c,Campus cafe closes too early on weekends.,2024-01-17,14:25:28
+c3c39e91-06df-42a3-abb8-9a8307109380,Need more bicycle parking spaces near lecture halls.,2024-01-17,15:40:43
+5788017f-e28c-424b-ad36-26e9870ec4fa,Bathroom cleaning schedule needs improvement.,2024-01-17,16:55:57
+df6efb44-a685-40c9-9bda-00323fa467d8,Library computers running very slowly.,2024-01-17,18:11:12
+1df51422-a33a-40d5-ae22-75add248c0c1,Security lights near parking lot B not working.,2024-01-17,19:26:26
+dcea5bc1-32fc-44df-97d4-7f6e3a003af5,Cafeteria running out of food options by lunch rush.,2024-01-18,08:41:41
+34aaefb7-1ffe-453a-9b72-b61fcd24eee2,Room temperature control not responding in Block D.,2024-01-18,09:56:55
+7e41e33e-11f8-4367-9ecd-882eac7ec1f4,Need more microwaves in common kitchen area.,2024-01-18,11:12:10
+f6e84b6d-1aba-4da0-8c02-bb149a2cdb00,Water pressure too low in all campus buildings.,2024-01-18,12:27:24
+e83d8c8e-24b6-459f-87b8-e21b3786ab62,Student lounge needs better ventilation system.,2024-01-18,13:42:39
+49e353e9-514d-44bb-a168-1e36aaa503cf,Campus wifi disconnects during video calls.,2024-01-18,14:57:53
+85127369-37a6-4e31-838c-5d393d384002,Printer in computer lab constantly jamming.,2024-01-18,16:13:08
+2585b460-0eed-46e9-91aa-657ba3c71997,Need more study spaces during exam period.,2024-01-18,17:28:22
+e8a4a721-0fdb-489e-97b6-ffedd1a02a52,Dormitory washing machines need maintenance.,2024-01-18,18:43:37
+77c336d6-ad52-4ee9-a33b-102e3d042eb4,Water leakage in corridor near room 234.,2024-01-18,19:58:51
+ea75ed8c-a096-4a4e-a961-a231cbbd2b14,Cafeteria food quality declining recently.,2024-01-19,08:14:06
+55d47c08-2af1-4307-b11b-dc92d98d0a8b,Study room air conditioning not working properly.,2024-01-19,09:29:20
+14b7bd5c-b3f1-41bf-b8a7-c30b601858cf,Need more vending machines in science building.,2024-01-19,10:44:35
+815dad91-a9ca-484a-a825-f12e6aa6b22c,Library needs more charging stations.,2024-01-19,11:59:49
+9a0b577e-ab56-4ae2-93f2-ec7b7baf7e6f,Campus gate security scanner malfunctioning.,2024-01-19,13:15:04
+675452e2-509a-4c3f-8a79-d9c8c2de2ee8,Hot water supply inconsistent in dorms.,2024-01-19,14:30:18
+6e92fe04-dd21-491c-b825-6072f027d758,Food court closes too early on weekdays.,2024-01-19,15:45:33
+a2228b88-f6ce-408f-9984-ddd5d965cd2c,Classroom projectors need maintenance.,2024-01-19,17:00:47
+5a817007-e091-4b51-a173-18f56d10fd93,Need more covered walkways for rainy season.,2024-01-19,18:16:02
+952eff27-cc74-490f-8d47-a12513997487,Student center AC not working properly.,2024-01-19,19:31:16
+91930450-f196-44e3-9e9e-f14b88e37023,Cafeteria needs more payment counters during rush hour.,2024-01-20,08:46:31
+79a49334-61f2-41de-a397-e38a981e5f54,Water dispenser in gym not cooling properly.,2024-01-20,10:01:45
+c2d97029-c246-4fa6-a770-0f88b4308b11,Library printers out of toner again.,2024-01-20,11:17:00
+dcb4d470-9f52-4a7b-993e-6aea682b4c2d,Need more lockers in sports complex.,2024-01-20,12:32:14
+24b4c2f0-54b9-4f7a-b781-9fe7ac0684fd,Dormitory elevator frequently breaks down.,2024-01-20,13:47:29
+75904d1f-5bf6-4ee4-9fb8-da55535b7ace,Study room chairs need replacement.,2024-01-20,15:02:43
+dc6cecd5-b5ef-4990-8fae-209d9b1ca5b3,Campus shuttle frequency insufficient during peak hours.,2024-01-20,16:17:58
+2ad2ec5f-edba-49dc-a12a-c5bbb0726191,Water fountain in library dispensing rusty water.,2024-01-20,17:33:12
+8025e4b6-7bda-43ee-b3eb-ee7caa3e0f59,Need more tables in outdoor study area.,2024-01-20,18:48:27
+20b8fcb2-1b47-4eb3-abcd-309cdf06e51d,Cafeteria food often served cold.,2024-01-20,20:03:41
+41d0a007-a96d-4123-8b3a-b7ed94965095,Library needs better pest control.,2024-01-21,08:18:56
+e587a33c-b574-4aeb-bec6-aa78fb104fce,Gym equipment needs regular maintenance.,2024-01-21,09:34:10
+57590860-96f0-4012-8e11-9261347601c9,Dormitory common room TV not working.,2024-01-21,10:49:25
+a502e907-9214-4425-b7c6-2a7c81dab018,Water pressure varies throughout the day.,2024-01-21,12:04:39
+6479b3d0-abc3-485c-880e-058e7a3b1bcd,Need more recycling bins on campus.,2024-01-21,13:19:54
+d2c1db67-4772-4dec-b5da-bb149e112ae5,Campus wifi signal weak in basement classrooms.,2024-01-21,14:35:08
+9187886d-2b69-494c-af3a-ff3fd40eab8a,Study room booking system needs updating.,2024-01-21,15:50:23
+dd338aa1-0020-4122-a5a0-458ff7a55697,Cafeteria needs more variety in breakfast options.,2024-01-21,17:05:37
+9e49be66-5a04-4e84-ba12-33cd18c84230,Library air conditioning too cold.,2024-01-21,18:20:52
+e7cc8d89-8fcc-4bb6-9507-538ccadfc397,Need more water coolers in sports area.,2024-01-21,19:36:06
+6933731a-b8fb-4d7d-af93-dc2af2db03c1,Dormitory kitchen appliances need replacement.,2024-01-22,08:51:21
+267ad948-f999-412c-8629-dac774fca9c7,Campus security cameras not working properly.,2024-01-22,10:06:35
+bad721c5-e67e-4c5f-8984-297729f4ef3a,Study room lighting too dim for reading.,2024-01-22,11:21:50
+b0edee90-421f-47a1-9a74-5ac140ecb21e,Water heater in gym showers broken.,2024-01-22,12:37:04
+f8b8d5ff-f93a-4267-b07e-8f3de2e21abb,Cafeteria needs more gluten-free options.,2024-01-22,13:52:19
+3156412a-a45c-4927-a06c-1be1824d935b,Library needs more group study rooms.,2024-01-22,15:07:33
+52b771ea-0da2-434d-8875-772fc0aa1098,Dormitory laundry room needs better ventilation.,2024-01-22,16:22:48
+7a8f7007-8a14-4e7b-83f6-78ff31f7d458,Campus paths poorly lit at night.,2024-01-22,17:38:02
+96f75432-4591-4891-82f3-e00bef100cca,Study room windows don't open properly.,2024-01-22,18:53:17
+ea15608b-8207-41b9-9468-37365aa99caa,Water quality in fountains needs improvement.,2024-01-22,20:08:31
+92ac23fa-c67d-4041-b658-04a67f4a405c,Cafeteria queue system inefficient during lunch.,2024-01-23,08:23:46
+bb349bab-3653-4492-8c6f-bdd8355f51d3,Library needs more computers for student use.,2024-01-23,09:39:00
+293c32f7-874c-47cc-8c2d-3a00fbdbaba3,Dormitory storage space insufficient.,2024-01-23,10:54:15
+cfdd8a92-78ae-416f-8d78-29951f1e3c64,Campus bike racks always full.,2024-01-23,12:09:29
+cb396b21-7354-40a2-86ad-12cec912470d,Study room temperature control broken.,2024-01-23,13:24:44
+a4ef5429-d5c7-4a10-81c4-af7e6c62a784,Water pressure low in upper floors.,2024-01-23,14:39:58
+555914c3-f240-432c-9cb9-4a95354c3213,Cafeteria salad bar needs more options.,2024-01-23,15:55:13
+0e4a3d5f-5f44-4bc6-8647-3691530d727c,Library printer costs too high.,2024-01-23,17:10:27
+97f93b20-4ba4-4577-adab-ba1ddd99edeb,Dormitory internet connection unstable.,2024-01-23,18:25:42
+252771b3-660f-46b5-a39f-5fc87518ed7e,Campus shuttle bus AC not working.,2024-01-23,19:40:56
+9acbb7b5-8396-49a9-aa24-e54d9d2e8899,Study room furniture needs updating.,2024-01-24,08:56:11
+86631802-647b-4f24-aea0-fd5c7b7fffea,Water dispenser in cafeteria broken.,2024-01-24,10:11:25
+ea9d8be9-3e81-49ab-850b-102f96742296,Need more microwave ovens in student center.,2024-01-24,11:26:40
+3354ac5c-f16d-44db-9f09-bf48d6adc226,Library website frequently crashes.,2024-01-24,12:41:54
+00c6a079-657e-498f-99f9-4a1b84e7bfe8,Dormitory cleaning service inadequate.,2024-01-24,13:57:09
+e6768bc8-8968-4516-b70a-4a4017f204dc,Campus parking fees too expensive.,2024-01-24,15:12:23
+ef273ecf-d2fb-4e68-afdd-10e8d988f89d,Study room booking limited to 2 hours.,2024-01-24,16:27:38
+d3f1e139-601d-4beb-bb1c-451d0abac002,Water leakage in computer lab ceiling.,2024-01-24,17:42:52
+3c699840-04ef-405c-9415-eba2c6879243,Cafeteria needs longer operating hours.,2024-01-24,18:58:07
+4b24bed7-c7ca-4188-8f49-2e7a50c021c3,Library needs better wifi coverage.,2024-01-24,20:13:21
+87941181-51a0-4e92-a5dd-810a63e1a03a,Dormitory package delivery system inefficient.,2024-01-25,08:28:36
+128937fb-f811-45fd-8e96-0204ea23f78f,Campus gym equipment outdated.,2024-01-25,09:43:50
+57ab972a-7e42-47e0-a022-ddf7f090a7f4,Study room ventilation poor.,2024-01-25,10:59:05
+5bcf09b5-952c-4814-86c8-867970679815,Water shortage in science building.,2024-01-25,12:14:19
+6c424f3b-4970-4778-bb19-60465c5dc2df,Cafeteria card reader often malfunctions.,2024-01-25,13:29:34
+753b4671-f5c5-4f98-9bed-74c717c40fea,Library elevator out of service.,2024-01-25,14:44:48
+ec4b524b-54a5-490b-b47d-8bcee6f85f1e,Dormitory pest control needed urgently.,2024-01-25,16:00:03
+faef269b-2aa5-4810-b8be-f901b8345a06,Campus ATM frequently out of service.,2024-01-25,17:15:17
+0b8b74cd-c4a3-4ec0-be94-d0be19003330,Study room power outlets not working.,2024-01-25,18:30:32
+174e7897-b137-4cb8-9aa1-cb0900f3db9c,Water dispenser in library needs cleaning.,2024-01-25,19:45:46
