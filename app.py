@@ -24,6 +24,7 @@ events_feedback = pd.read_csv("event-feedback.csv")
 
 # Display mode color light/dark... might move to session state later
 bg_color = "white"
+n_grams = (2,3) # for word cloud
 
 # Initialise session state for filters
 if "filters" not in st.session_state:
@@ -86,16 +87,16 @@ st.markdown("##")
 
 # Display KPIs
 first_col, second_col = st.columns(2)
-# first_col, second_col, third_col, forth_col = st.columns(4)
 
 with first_col:
     st.subheader(f"No. of Complaints: {no_of_complaints:,}")
 with second_col:
     st.subheader(f"No. of Events: {no_of_events:,}")
 
+st.markdown("---")
 
-# Graphs building #
-# 1. Line graph of number of complaints per day
+# Graphs building
+# Line graph of number of complaints per day
 complaints_per_day = complaints_data.groupby("date").size().reset_index(name="num_complaints")
 
 # Create the interactive line graph with Plotly Express
@@ -109,11 +110,11 @@ complaints_per_day_fig = px.line(
 
 complaints_per_day_fig.update_layout(
     title=dict(
-        text="Number of Complaints Per Day",
-        x=0.5, # Centering
+        text="Complaints Per Day",
+        x=0.4, # Centering
         font=dict(size=15)
     ),
-    width=400,
+    width=600,
     height=300,
     margin=dict(t=27, b=0, l=0, r=0),
     showlegend=False,
@@ -124,27 +125,106 @@ complaints_per_day_fig.update_layout(
 )
 
 
-# 2. Wordcloud showing most common non-stopword bi and tri-grams.
-vectorizer = CountVectorizer(ngram_range=(2, 3), stop_words="english")
-X = vectorizer.fit_transform(complaints_data["complaint_text"])
-ngrams = vectorizer.get_feature_names_out()
+# Wordcloud showing most common complaints non-stopword bi and tri-grams.
+complaints_vectorizer = CountVectorizer(ngram_range=n_grams, stop_words="english")
+X_complaints = complaints_vectorizer.fit_transform(complaints_data["complaint_text"])
+complaints_ngrams = complaints_vectorizer.get_feature_names_out()
 
 # Generate n-gram frequencies
-ngram_frequencies = dict(zip(ngrams, X.toarray().sum(axis=0)))
+complaints_ngram_frequencies = dict(zip(complaints_ngrams, X_complaints.toarray().sum(axis=0)))
 
 # Generate the word cloud
-wordcloud = WordCloud(width=400, height=300, background_color=bg_color).generate_from_frequencies(ngram_frequencies)
+complaints_wordcloud = WordCloud(width=600, height=470, background_color=bg_color).generate_from_frequencies(complaints_ngram_frequencies)
 
 complaints_ngrams_fig, ax = plt.subplots(figsize=(10, 5))
-ax.imshow(wordcloud, interpolation="bilinear")
+ax.imshow(complaints_wordcloud, interpolation="bilinear")
 ax.axis("off")
 
 
-# Display Visuals
-second_first_col, second_second_col = st.columns(2)
+# Pie chart of positive Vs negative reviews
+sentiment_count = feedback_df_by_event["sentiment"].value_counts().reset_index(name='count')
+sentiment_count.columns = ["sentiment", "count"]
 
+# Create the pie chart with Plotly Express
+sentiment_pie_chart = px.pie(
+    sentiment_count, 
+    names="sentiment", 
+    values="count", 
+    color="sentiment",
+    color_discrete_map={"positive": "green", "negative": "red"}
+)
+sentiment_pie_chart.update_layout(
+    title=dict(
+        text="Positive vs Negative Complaints",
+        x=0.3, # Centering
+        font=dict(size=15)
+    ),
+    width=600,
+    height=300,
+    margin=dict(t=27, b=0, l=0, r=0),
+    showlegend=False,
+    xaxis_showgrid=False,
+    yaxis_showgrid=False,
+    plot_bgcolor=bg_color,
+    paper_bgcolor=bg_color
+)
+
+
+# Wordcloud showing most common events feedback non-stopword bi and tri-grams
+events_vectorizer = CountVectorizer(ngram_range=n_grams, stop_words="english")
+X_events = events_vectorizer.fit_transform(feedback_df_by_event["text"])
+events_ngrams = events_vectorizer.get_feature_names_out()
+
+# Generate n-gram frequencies
+events_ngram_frequencies = dict(zip(events_ngrams, X_events.toarray().sum(axis=0)))
+
+# Generate the word cloud
+events_wordcloud = WordCloud(width=600, height=470, background_color=bg_color).generate_from_frequencies(events_ngram_frequencies)
+
+events_ngrams_fig, events_ax = plt.subplots(figsize=(10, 5))
+events_ax.imshow(events_wordcloud, interpolation="bilinear")
+events_ax.axis("off")
+
+
+# Display Visuals:
+st.subheader("Complaints Info")
+second_first_col, second_second_col, second_third_col = st.columns(3)
 with second_first_col:
     st.plotly_chart(complaints_per_day_fig)
-    st.markdown("#### Word Cloud of N-Grams")
+with second_second_col:
     st.pyplot(complaints_ngrams_fig)
-# with second_first_col:
+with second_third_col:
+    # searchable dataframe for event reviews
+    complaints_search_term = st.text_input("Search complaints:", "").split(" ")
+
+    # Filter DataFrame based on search term
+    if complaints_search_term:
+        complaints_filtered_df = complaints_data[complaints_data["complaint_text"].apply(lambda x: all(term.lower() in str(x).lower() for term in complaints_search_term))]
+    else:
+        complaints_filtered_df = complaints_data
+
+    # Display the filtered DataFrame
+    display_df = pd.DataFrame(complaints_filtered_df.head(5)["complaint_text"].tolist(), columns=["Complaints"])
+    st.dataframe(display_df)
+
+st.markdown("---")
+
+st.subheader("Events Info")
+third_first_col, third_second_col, third_third_col = st.columns(3)
+with third_first_col:
+    st.plotly_chart(sentiment_pie_chart)
+with third_second_col:
+    st.pyplot(events_ngrams_fig)
+with third_third_col:
+    # searchable dataframe for event reviews
+    search_term = st.text_input("Search reviews:", "").split(" ")
+
+    # Filter DataFrame based on search term
+    if search_term:
+        filtered_df = feedback_df_by_event[feedback_df_by_event["text"].apply(lambda x: all(term.lower() in str(x).lower() for term in search_term))]
+    else:
+        filtered_df = feedback_df_by_event
+
+    # Display the filtered DataFrame
+    display_df = pd.DataFrame(filtered_df.head(5)["text"].tolist(), columns=["Reviews"])
+    st.dataframe(display_df.style.hide(axis="index"))
