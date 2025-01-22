@@ -7,22 +7,51 @@ from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, H
 # others
 import io
 from config import *
+from typing import BinaryIO
 
 whisper_client = OpenAI(api_key=OPEN_AI_KEY)
 
 
-def audio_to_transcript(audio_file) -> str:
+def audio_to_transcript(audio_file: BinaryIO) -> str:
+    def split_audio(file: BinaryIO, chunk_size: int = 25 * 1024 * 1024) -> list:
+        """
+        Splits a file-like object into chunks of the specified size (in bytes).
+        """
+        file.seek(0)  # Ensure we start reading from the beginning
+        chunks = []
+        while True:
+            chunk = file.read(chunk_size)
+            if not chunk:
+                break
+            chunk_io = io.BytesIO(chunk)
+            chunk_io.name = audio_file.name  # Retain original file name
+            chunks.append(chunk_io)
+        file.seek(0)  # Reset the pointer after splitting
+        return chunks
+
+    # Check the file size
+    audio_file.seek(0, 2)  # Move to the end of the file
+    file_size = audio_file.tell()
+    audio_file.seek(0)  # Reset pointer to the start
+
+    if file_size > 25 * 1024 * 1024:  # File exceeds 25 MB
+        chunks = split_audio(audio_file)
+        transcripts = []
+        for idx, chunk in enumerate(chunks):
+            print(f"Processing chunk {idx + 1} of {len(chunks)}...")
+            transcription = whisper_client.audio.transcriptions.create(
+                model="whisper-1", 
+                file=chunk
+            )
+            transcripts.append(transcription.text)
+        return " ".join(transcripts)
+    else:  # File is within size limit
+        transcription = whisper_client.audio.transcriptions.create(
+            model="whisper-1", 
+            file=audio_file
+        )
+        return transcription.text
     
-    audio_bytes = audio_file.read()
-    audio_io = io.BytesIO(audio_bytes)
-    audio_io.name = audio_file.name
-
-    transcription = whisper_client.audio.transcriptions.create(
-        model="whisper-1", 
-        file=audio_file
-    )
-    return transcription.text
-
 
 def generate_transcript_insights(transcript: str) -> dict:
     response_schemas = [
@@ -56,3 +85,4 @@ def generate_transcript_insights(transcript: str) -> dict:
     insights = output_parser.parse(response.content)
     
     return insights
+

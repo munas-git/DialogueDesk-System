@@ -36,16 +36,24 @@ complaints_data = pd.read_csv("dataset/student-complaints.csv")
 bg_color = "white"
 n_grams = (2,3) # for word cloud
 
+# ===================================================================================================
 # Initialise session states
 if "meeting_insight_date" not in st.session_state: # Viewing insight for meating
     st.session_state.meeting_insight_date = datetime.date.today()
 
-if "meeting_date" not in st.session_state: # Uploading meeting for today or past date
+if "meeting_date" not in st.session_state: # For uploading meeting for today or past date
     st.session_state.meeting_date = datetime.date.today()
 
 # Initialising session state for chat
 if "chat_messages" not in st.session_state:
     st.session_state.chat_messages = []
+
+if "selected_meeting_id" not in st.session_state: # for retrieving meeting insights
+    st.session_state.selected_meeting_id = None
+
+if "meeting_insights" not in st.session_state:
+    st.session_state.meeting_insights = None
+# ===================================================================================================
 
 
 st.sidebar.header("Upload Meeting Recording.")
@@ -90,7 +98,7 @@ if uploaded_file is not None:
                     meeting_id = "Meeting 1"
                 else:
                     meeting_id = f"Meeting {no_of_meetings + 1}"
-                print(meeting_date)
+
                 meeting_data = {
                     "Date": meeting_date,
                     "meeting_id": meeting_id, 
@@ -243,15 +251,32 @@ else:
     selected_meeting_id = "Meeting 1"
 
 
-# Updating date in session state
-st.session_state.meeting_insight_date = meeting_insight_date
-# Mode filter
+# Check if there is need to fetch new data [state change or meeting_date (upload date) = meeting_insight_date (selected date for insight)]
+if (
+    meeting_insight_date != st.session_state.meeting_insight_date
+    or selected_meeting_id != st.session_state.selected_meeting_id
+    or (meeting_date == meeting_insight_date and st.session_state.meeting_insights["transcript"] == "None available at the moment") # meaning that the just uploaded data hasnt been retrieved
+):
+    # Update session state with new parameters
+    st.session_state.meeting_insight_date = meeting_insight_date
+    st.session_state.selected_meeting_id = selected_meeting_id
+
+    # Retrieve and store data in session state
+    st.session_state.meeting_insights = search_by_date_and_id(
+        meeting_insight_date, selected_meeting_id
+    )
+
+meeting_insights = st.session_state.meeting_insights
 mode = st.radio("Choose mode", ("Transcript", "Summary"))
-# Extracting days meeting insights
-meeting_insights = search_by_date_and_id(meeting_insight_date, selected_meeting_id)
-meeting_key_points = meeting_insights["key_points"]
-meeting_action_items = meeting_insights["action_items"]
-text_content = meeting_insights["transcript"] if mode == "Transcript" else meeting_insights["ai_summary"]
+
+if meeting_insights:
+    meeting_key_points = meeting_insights["key_points"]
+    meeting_action_items = meeting_insights["action_items"]
+    meeting_transcript = meeting_insights["transcript"]
+    meeting_ai_summary = meeting_insights["ai_summary"]
+    text_content = meeting_transcript if mode == "Transcript" else meeting_ai_summary
+else:
+    st.warning("No meeting insights available. Please check the date and ID.")
 
 
 st.markdown("""
