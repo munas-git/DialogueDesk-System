@@ -73,3 +73,5 @@ def search_by_date_and_id(date:str, meeting_id:str) -> dict:
             "action_items" : [],
         }
         return output
+    
+print(meetings_metadata_by_date("2025-01-22"))

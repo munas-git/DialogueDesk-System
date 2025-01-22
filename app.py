@@ -16,7 +16,7 @@ import re
 import datetime
 
 # LLM/Agent related
-from LLMOps import audio_to_transcript, generate_transcript_insights
+from LLMOps import audio_to_transcript, generate_transcript_insights, Agent
 
 # db related
 from MongoDBOps import *
@@ -29,8 +29,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# dataframes...
+# dataframe and AI Agent
 complaints_data = pd.read_csv("dataset/student-complaints.csv")
+agent = Agent()
 
 # Display mode color light/dark... might move to session state later
 bg_color = "white"
@@ -137,7 +138,7 @@ with st.sidebar:
         messages.chat_message("user").write(new_prompt)
 
         # generate RAG AI response & add to sesion state as well
-        answer = "Implement soon..."
+        answer = agent.answer(new_prompt)
         st.session_state.chat_messages.append({"role": "assistant", "content": answer})
         messages.chat_message("assistant").write(answer)
 
