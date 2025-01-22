@@ -33,7 +33,7 @@ def generate_transcript_insights(transcript: str) -> dict:
 
     output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
     system_message = SystemMessagePromptTemplate.from_template(
-        "You are an assistant skilled at summarizing and extracting insights from meetings data for high-level organizations, meaning TOP QUALITY OUTPUT ONLY."
+        "You are an assistant skilled at summarizing and extracting insights from meetings data for high-level organizations, meaning TOP QUALITY OUTPUT ONLY. ake sure to be exhaustive about the key points and action points as well."
     )
 
     template = """
