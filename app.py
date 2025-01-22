@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import datetime
 
 # LLM/Agent related
-from LLMOps import audio_to_transcript
+from LLMOps import audio_to_transcript, generate_transcript_insights
 
 
 # page settings
@@ -63,20 +63,34 @@ meeting_date = st.sidebar.date_input(
     max_value=datetime.date.today(),
     key="meeting_date_upload" 
 )
+
 # File uploader widget
 uploaded_file = st.sidebar.file_uploader("Upload an audio file", type=["mp3", "wav", "m4a", "flac", "webm"])
-if uploaded_file is not None:
-    transcript = audio_to_transcript(uploaded_file)
-    generate_transcript_insights()
-else:
-    pass
+sidebar_status = st.sidebar.empty()
 
-# Process the uploaded file
+import time
+# Only show submit button if a file is uploaded
 if uploaded_file is not None:
-    st.sidebar.write("File uploaded:", uploaded_file.name)
-    st.sidebar.audio(uploaded_file, format="audio/mp3")
+    # Add submit button to sidebar
+    if st.sidebar.button("Process Audio File"):
+        # Show loading status in sidebar
+        with st.sidebar:
+            with st.spinner("Processing your audio file..."):
+                sidebar_status.text("Step 1: Extracting Transcript...")
+                transcript = audio_to_transcript(uploaded_file)
+                
+                sidebar_status.text("Step 2: Generating Insights...")
+                insights = generate_transcript_insights(transcript)                
+                
+                sidebar_status.text("Step 3: Uploading Insights to DB...")
+                time.sleep(1)
+
+                # Clear status messages and returning info (temp till fix)
+                sidebar_status.empty()
+                st.sidebar.success("Processing complete!")
+                st.write(insights)
 else:
-    st.sidebar.write("No file uploaded yet. Please upload an audio file.")
+    st.sidebar.info("No file uploaded yet")
 st.sidebar.divider()
 
 
