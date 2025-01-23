@@ -18,6 +18,17 @@ DialogueDeskCollection = DialogueDeskDB["Meetings_Insights"]
 
 
 def upload_data(data: dict):
+    """
+    For uploading meeting insights. Input format ->
+    {
+        "Date": meeting_date,
+        "meeting_id": f"Meeting - {meeting_time}", 
+        "transcript": transcript, 
+        "ai_summary": insights.get("Summary", "No summary available"),
+        "key_points" : insights.get("key_points_discussed", []),
+        "action_items" : insights.get("action_items", []) 
+    }
+    """
     try:
         result = DialogueDeskCollection.insert_one(data)
     except pymongo.errors.OperationFailure:
