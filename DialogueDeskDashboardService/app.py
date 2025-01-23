@@ -32,7 +32,7 @@ st.set_page_config(
 )
 
 # dataframe and AI Agent
-complaints_data = pd.read_csv("dataset/student-complaints.csv")
+complaints_data = pd.read_csv("../dataset/student-complaints.csv")
 
 # Display mode color light/dark... might move to session state later
 bg_color = "white"
@@ -102,7 +102,7 @@ if uploaded_file is not None:
 
                 # Clear status messages and returning info
                 sidebar_status.empty()
-                st.sidebar.success("Process Completed!")
+                st.sidebar.success("Process completed; concerned individuals will be notified!") # Probably include the number of users as well.
                 
 
                 meeting_data = {
@@ -149,7 +149,6 @@ with st.sidebar:
         messages.chat_message("user").write(new_prompt)
 
         # generate RAG AI response & add to sesion state as well
-        # answer = agent.answer(f"This is the conversation history, make sure to ansert conversation history related questions with this\n{formatted_context}\n\n This is the new prompt now: {new_prompt}")
         conversation_history = (
             "This is the conversation history, make sure to answer conversation "
             "history-related questions such as what was my last question, follow up questions and anything that depends on the last conersation with this\n"
@@ -167,7 +166,7 @@ with st.sidebar:
 # KPIs
 no_of_complaints = len(complaints_data["complaint_id"])
 
-st.title("🗣 DialogueDesk Dashboard.")
+st.title("🗣 DialogueDesk Dashboard 📊.")
 st.markdown("##")
 
 
