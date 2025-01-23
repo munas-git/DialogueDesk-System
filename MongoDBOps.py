@@ -44,8 +44,14 @@ def meetings_metadata_by_date(date: str) -> dict:
         print(f"ERROR Retrieving date: {e}")
 
 
-def search_by_date_and_id(date_id_tup: tuple) -> dict:
+def search_by_date_and_id(date_id_tup: str) -> dict:
     """
+    sample input:
+        2025-01-23 | Meeting 3
+        2025-01-23 Meeting 1
+
+        No need for any fancy formatting as regex is used to pick the date and meeting id.
+
     Sample output...
     {
         "transcript" : "None available at the moment",
@@ -58,10 +64,9 @@ def search_by_date_and_id(date_id_tup: tuple) -> dict:
         # I think langchain agent is passing the input as string instead of actual tuple
         # using regex to extract date and id from ... tried wraping with tuple but didnt work hence this hack (at least for now)
 
-        date_pattern, meeting_id_pattern = r"\d{4}-\d{2}-\d{2}", r"Meeting\s\d+"
+        date_pattern, meeting_id_pattern = r"\d{4}-\d{2}-\d{2}", r"Meeting - \d{2}:\d{2}"
         ################# incase of errors thrown because of invalid meeting info, check back here #############
         date, meeting_id = re.findall(date_pattern, date_id_tup)[0], re.findall(meeting_id_pattern, date_id_tup)[0]
-
         result = DialogueDeskCollection.find_one({"Date" : date, "meeting_id" : meeting_id})
 
         output = {
@@ -73,16 +78,11 @@ def search_by_date_and_id(date_id_tup: tuple) -> dict:
         return output
 
     except Exception as e:
-        print(f"ERROR: {e}")
-        
+        # print(f"ERROR: {e}")
         output = {
             "transcript" : "None available at the moment",
             "ai_summary" : "None available at the moment",
             "key_points" : [],
             "action_items" : [],
         }
-        return 
-    
-
-# search_by_date_and_id("2025-01-22, Meeting 1")
-# print(DialogueDeskCollection.find_one({"Date" : "2025-01-15", "meeting_id" : "Meeting 1"}))
+        return

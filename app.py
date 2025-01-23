@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 
 # Others
 import re
+import time
+import json
 import datetime
 
 # LLM/Agent related
@@ -31,7 +33,6 @@ st.set_page_config(
 
 # dataframe and AI Agent
 complaints_data = pd.read_csv("dataset/student-complaints.csv")
-agent = Agent()
 
 # Display mode color light/dark... might move to session state later
 bg_color = "white"
@@ -44,6 +45,9 @@ if "meeting_insight_date" not in st.session_state: # Viewing insight for meating
 
 if "meeting_date" not in st.session_state: # For uploading meeting for today or past date
     st.session_state.meeting_date = datetime.date.today()
+
+if "meeting_time" not in st.session_state: # For uploading meeting for today or past date
+    st.session_state.meeting_time = datetime.date.today()
 
 # Initialising session state for chat
 if "chat_messages" not in st.session_state:
@@ -60,19 +64,26 @@ if "meeting_insights" not in st.session_state:
 st.sidebar.header("Upload Meeting Recording.")
 # Select the date for the meeting upload
 meeting_date = st.sidebar.date_input(
-    "Select Recording Date:",
+    "Select Meeting Date:",
     value=datetime.date.today(),
     min_value=datetime.date(2006, 1, 1),
     max_value=datetime.date.today(),
     key="meeting_date_upload" 
 )
+meeting_time = st.sidebar.time_input(
+        "Select Meeting Time:", 
+        value=datetime.time(12, 0)  # Default afternoon
+    )
+
 meeting_date = meeting_date.strftime('%Y-%m-%d')
+meeting_time = meeting_time.strftime('%H:%M')
+
 
 # File uploader widget
 uploaded_file = st.sidebar.file_uploader("Upload an audio file", type=["mp3", "wav", "m4a", "flac", "webm"])
 sidebar_status = st.sidebar.empty()
 
-import time
+
 # Only show submit button if a file is uploaded
 if uploaded_file is not None:
     # Add submit button to sidebar
@@ -93,21 +104,16 @@ if uploaded_file is not None:
                 sidebar_status.empty()
                 st.sidebar.success("Process Completed!")
                 
-                # checking number of meetings for the day in order to index current meeting properly.
-                no_of_meetings = meetings_metadata_by_date(meeting_date)["no_of_meetings"]
-                if no_of_meetings < 1:
-                    meeting_id = "Meeting 1"
-                else:
-                    meeting_id = f"Meeting {no_of_meetings + 1}"
 
                 meeting_data = {
                     "Date": meeting_date,
-                    "meeting_id": meeting_id, 
+                    "meeting_id": f"Meeting - {meeting_time}", 
                     "transcript": transcript, 
                     "ai_summary": insights.get("Summary", "No summary available"),
                     "key_points" : insights.get("key_points_discussed", []),
                     "action_items" : insights.get("action_items", []) 
                 }
+
                 # Uploading the data --- If data says uploaded but doesnt reflect on db, check and move this aspect above process completed.
                 upload_data(meeting_data)
 
@@ -116,11 +122,16 @@ else:
 st.sidebar.divider()
 
 
+# Extracting past 10 messages then re-ordering so that last entered (most recent) can be first for context.
+context = st.session_state.chat_messages[-10:][::-1]
+formatted_context = "\n".join(f"{message['role']}: {message['content']}" for message in context)
+agent = Agent()
+
 # Sidebar for chat
 with st.sidebar:
     st.title("🤖 AI Representative")
 
-    # Chat container
+    # Chat input
     messages = st.container(height=300)
     for msg in st.session_state.chat_messages:
         if msg["role"] == "user":
@@ -138,15 +149,25 @@ with st.sidebar:
         messages.chat_message("user").write(new_prompt)
 
         # generate RAG AI response & add to sesion state as well
-        answer = agent.answer(new_prompt)
+        # answer = agent.answer(f"This is the conversation history, make sure to ansert conversation history related questions with this\n{formatted_context}\n\n This is the new prompt now: {new_prompt}")
+        conversation_history = (
+            "This is the conversation history, make sure to answer conversation "
+            "history-related questions such as what was my last question, follow up questions and anything that depends on the last conersation with this\n"
+            f"{formatted_context}\n\n"
+        )
+
+        new_prompt_instruction = f"This is the new prompt for you to answer now: {new_prompt}"
+
+        # Combine the history and new prompt
+        answer = agent.answer(f"{conversation_history}{new_prompt_instruction}")
         st.session_state.chat_messages.append({"role": "assistant", "content": answer})
         messages.chat_message("assistant").write(answer)
-
+        
 
 # KPIs
 no_of_complaints = len(complaints_data["complaint_id"])
 
-st.title("📊 Complaints & Meeting Insights Dashboard")
+st.title("🗣 DialogueDesk Dashboard.")
 st.markdown("##")
 
 
@@ -227,7 +248,7 @@ st.divider()
 
 # Meeting insights section #
 st.markdown("<h2 style='text-align: center;'>Meeting Insights Section</h2>", unsafe_allow_html=True)
-date_filter_col, meeting_id_filter, _, _, _, _, _, _, = st.columns(8) # temporaty hack to make the date selection column look smaller.
+date_filter_col, meeting_id_filter, _, _, _, _, = st.columns(6) # temporaty hack to make the date selection column look smaller.
 
 with date_filter_col:
     # Date input
@@ -249,14 +270,14 @@ if no_of_meetings > 1:
     with meeting_id_filter:
         selected_meeting_id = st.selectbox("Select Meeting ID:", meeting_ids)
 else:
-    selected_meeting_id = "Meeting 1"
+    selected_meeting_id = "Meeting 1" ####################
 
 
 # Check if there is need to fetch new data [state change or meeting_date (upload date) = meeting_insight_date (selected date for insight)]
 if (
     meeting_insight_date != st.session_state.meeting_insight_date
     or selected_meeting_id != st.session_state.selected_meeting_id
-    or (meeting_date == meeting_insight_date and st.session_state.meeting_insights["transcript"] == "None available at the moment") # meaning that the just uploaded data hasnt been retrieved
+    or (meeting_date == meeting_insight_date and st.session_state.get("transcript") == "None available at the moment") # meaning that the just uploaded data hasnt been retrieved
 ):
     # Update session state with new parameters
     st.session_state.meeting_insight_date = meeting_insight_date
@@ -264,7 +285,7 @@ if (
 
     # Retrieve and store data in session state
     st.session_state.meeting_insights = search_by_date_and_id(
-        meeting_insight_date, selected_meeting_id
+        f"{meeting_insight_date}, {selected_meeting_id}"
     )
 
 meeting_insights = st.session_state.meeting_insights
@@ -277,7 +298,11 @@ if meeting_insights:
     meeting_ai_summary = meeting_insights["ai_summary"]
     text_content = meeting_transcript if mode == "Transcript" else meeting_ai_summary
 else:
-    st.warning("No meeting insights available. Please check the date and ID.")
+    meeting_key_points = []
+    meeting_action_items = []
+    meeting_transcript = "No meeting insights available. Please check the date and ID."
+    meeting_ai_summary = "No meeting insights available. Please check the date and ID."
+    text_content = meeting_transcript if mode == "Transcript" else meeting_ai_summary
 
 
 st.markdown("""
