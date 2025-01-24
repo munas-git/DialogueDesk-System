@@ -1,108 +1,139 @@
-# Langchain related
-from langchain_openai import ChatOpenAI
-from langchain.agents import initialize_agent, Tool
+# lang graph specific
+from langgraph.graph import StateGraph, END
+from langchain_core.messages import AIMessage
+from typing import TypedDict, List, Annotated
 
 # others
-import asyncio
+import json
+import operator
 from config import OPEN_AI_KEY
 from ComplaintsMongoDBOps import *
+from langchain_openai import ChatOpenAI
 
 
-class AsyncAgent:
+llm = ChatOpenAI(
+    model="gpt-3.5-turbo",
+    temperature=0,
+    max_tokens=800,
+    api_key=OPEN_AI_KEY
+)
+
+
+class AgentState(TypedDict):
+    messages: Annotated[List[dict], operator.add]
+    complaint_data: dict
+    is_complaint: bool
+
+class DialogueDeskAgent:
     def __init__(self):
-        self.tools = [
-            Tool(
-                name="lodge_complaint",
-                func=self._sync_wrapper(lodge_complaint),
-                description="""
-                    Purpose:
-                        This tool allows the chatbot to accept and upload a user's complaint to a NoSQL database.
-                        The complaint is submitted as a JSON object, which contains relevant details such as;
-                        the complaint text, related topics, whether the user wants updates, and the current status of the complaint.
-
-                    Input json input expected are as follows:
-                    date (the date of the complaint which is stated in the prompt after 'This message was sent on date:')
-                    complaint_text (User's complaint or issue description)
-                    complaint_topic_1 (a topic that describe the complaint),
-                    complaint_topic_2 (a second topic that describe the complaint)
-                    receive_update (yes or no),
-                    status: (resolved or (pending)
-
-                    receive update should be yes by default and status should be pending by default.
-                    Remember to tell the user their complaint id which is returned after succesful call of this function.
-                """
-            )
-        ]
-
-        # Define a system message template (replace with your actual template)
-        self.system_message = """
-        You are an AI Assistant chatbot designed to interact with users and assist them effectively.
-
-        Your name is DialogueDeskBot
-        Your Bio: The peoples' voices, amplified. I ensure your concerns reach the right audience, & keep you posted too.
-
-        Your purpose is to help individuals with the following tasks:
-        **Commands**
-        /start - Start the bot and introduce yourself.
-        /help - Provide guidance on how to use the bot.
-        /make_report - Submit a complaint or report an issue (e.g. technical, service-related).
-        /report_update - Check the status of an existing report (use an ID if multiple complaints exist).
-        /cancel_notifications - Stop receiving notifications about the progress of one or all complaints.
-        /receive_notifications - Resume notifications about one or all complaints.
-
-        **How You Work**
-        - If a user describes a problem or complaint, acknowledge it politely, log the issue, and let them know they will be updated.
-        - If a user asks for a report update, retrieve the status and provide a concise update.
-        - If a user wants to manage notifications, handle their request to either stop or resume notifications.
-        - If the user is unsure, respond with helpful information and suggest the available commands.
-        - Always respond with empathy and precision, ensuring the user feels heard and supported.
-        
-        **Tone**
-        - Empathetic: Acknowledge the user's concerns and show understanding.
-        - Proactive: Anticipate what the user might need and offer helpful suggestions.
-        - Informative: Keep responses concise while providing all necessary details.
-
-        ***VERY IMPORTANT*
-        When lodging user complaints, it is very important to be kind and empathetic with the user explaining to them that you understand the difficulty
-        and discomfort it may have inform them that you will keep them updated on any single updates regarding their situation. also tell them that
-        they have the oprion to opt out/in of notifications regarding the issue.
-        """
-
-        # Initialize the LLM with asynchronous support
+        # Initialize LLM
         self.llm = ChatOpenAI(
             model="gpt-3.5-turbo",
             temperature=0,
             max_tokens=800,
-            timeout=None,
-            max_retries=2,
             api_key=OPEN_AI_KEY
         )
 
-        # Initialize the agent
-        self.agent = initialize_agent(
-            self.tools,
-            self.llm,
-            agent="zero-shot-react-description",
-            verbose=True,
-            handle_parsing_errors=True,
-            agent_kwargs={
-                "system_message": self.system_message
-            }
-        )
+        # building workflow graph
+        self.workflow = StateGraph(AgentState)
 
-    # Async method to handle a query
+        # nodes here
+        self.workflow.add_node("determine_intent", self.determine_intent)
+        self.workflow.add_node("extract_complaint_details", self.extract_complaint_details)
+        self.workflow.add_node("lodge_complaint", self.lodge_complaint_to_db)
+        self.workflow.add_node("general_response", self.general_response)
+
+        # conditional routing
+        def route(state: AgentState):
+            return "extract_complaint_details" if state.get("is_complaint", False) else "general_response"
+
+        # edges
+        self.workflow.add_conditional_edges("determine_intent", route)
+        self.workflow.add_edge("extract_complaint_details", "lodge_complaint")
+        self.workflow.add_edge("lodge_complaint", END)
+        self.workflow.add_edge("general_response", END)
+
+        # entry point & graph compilation.
+        self.workflow.set_entry_point("determine_intent")
+        self.app = self.workflow.compile()
+
+
+    def determine_intent(self, state: AgentState):
+        messages = state["messages"]
+        last_message = messages[-1]["content"]
+        
+        classification_prompt = f"""
+        Classify if the following message is a complaint that needs to be logged:
+        "{last_message}"
+        
+        Respond with ONLY 'YES' or 'NO':
+        """
+        
+        response = self.llm.invoke(classification_prompt).content.strip().upper()
+        
+        return {
+            'is_complaint': response == 'YES',
+            'complaint_data': {} if response != 'YES' else None
+        }
+
+    def extract_complaint_details(self, state: AgentState):
+        last_message = state['messages'][-1]['content']
+        
+        complaint_extraction_prompt = f"""
+        Extract the following complaint details from the message:
+        - Date: Current date
+        - Complaint Text: Detailed description of the issue
+        - Complaint Topic 1: Primary category of complaint
+        - Complaint Topic 2: Secondary category (if applicable)
+        
+        Respond in strict JSON format:
+        {{
+            "date": "YYYY-MM-DD",
+            "complaint_text": "...",
+            "complaint_topic_1": "...",
+            "complaint_topic_2": "...",
+            "receive_update": "yes",
+            "status": "pending"
+        }}
+        
+        Message to extract: "{last_message}"
+        """
+        
+        complaint_json = self.llm.invoke(complaint_extraction_prompt).content
+        complaint_data = json.loads(complaint_json)
+        
+        return {'complaint_data': complaint_data}
+
+    def lodge_complaint_to_db(self, state: AgentState):
+        complaint_data = state['complaint_data']
+        complaint_id = lodge_complaint(json.dumps(complaint_data))
+        
+        return {
+            'messages': [
+                AIMessage(content=f"Your complaint has been logged. Complaint ID: <code>{complaint_id}</code>")
+            ]
+        }
+
+    def general_response(self, state: AgentState):
+        last_message = state['messages'][-1]['content']
+        
+        response_prompt = f"""
+        Provide a helpful, conversational response to:
+        "{last_message}"
+        
+        If the query seems related to a complaint or report, guide the user on how to proceed.
+        """
+        
+        response = self.llm.invoke(response_prompt).content
+        
+        return {
+            'messages': [AIMessage(content=response)]
+        }
+
     async def answer(self, query):
-        try:
-            # Use the asynchronous method to invoke the agent
-            response = await self.agent.ainvoke({"input": query})
-            return response
-        except Exception as e:
-            print(f"Error processing query: {str(e)}")
-            return "Oh ohh... I can't respond right now. Please try again later 🤧😷"
-
-    
-    def _sync_wrapper(self, async_func):
-        """Wraps an async function to make it compatible with sync calls."""
-        def sync_func(*args, **kwargs):
-            return asyncio.run(async_func(*args, **kwargs))
-        return sync_func
+        inputs = {
+            'messages': [{'content': query}]
+        }
+        
+        response = await self.app.ainvoke(inputs)
+        return response['messages'][-1].content

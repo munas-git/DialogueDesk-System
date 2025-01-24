@@ -11,6 +11,10 @@ from config import *
 from MongoDBOps import *
 from typing import BinaryIO
 
+# silencing warnings
+import warnings
+warnings.filterwarnings('ignore')
+
 whisper_client = OpenAI(api_key=OPEN_AI_KEY)
 
 

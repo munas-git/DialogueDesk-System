@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 # Others
 import re
 import time
-import asyncio
 import datetime
 
 # LLM/Agent related
@@ -36,23 +35,10 @@ n_grams = (2,3) # for word cloud
 
 #  Initialise session state data
 # ===================================================================================================
-async def load_complaints_data():
-    # Load data asynchronously
-    st.session_state.complaints_data = await create_complaints_dataframe()
-
-# Function to run async code
-def run_async_function():
-    loop = asyncio.new_event_loop()  # Create a new event loop
-    asyncio.set_event_loop(loop)     # Set it as the current event loop
-    loop.run_until_complete(load_complaints_data())  # Run the async function
-
-
 # Initial load
 if st.session_state.get("complaints_data") is None:
-    run_async_function()
-
+    st.session_state.complaints_data = create_complaints_dataframe()
 complaints_data = st.session_state.get("complaints_data")
-
 
 if "meeting_insight_date" not in st.session_state: # Viewing insight for meating
     st.session_state.meeting_insight_date = datetime.date.today()
@@ -197,17 +183,8 @@ st.divider()
 
 # Button to refresh data
 if st.button("Refresh Data"):
-    run_async_function()
+    st.session_state.complaints_data = create_complaints_dataframe()
     complaints_data = st.session_state.get("complaints_data")
-
-    # Create a new event loop to handle asynchronous tasks
-    # loop = asyncio.new_event_loop()  # Explicitly create a new event loop
-    # asyncio.set_event_loop(loop)     # Set it as the current event loop
-    # loop.run_until_complete(load_complaints_data())  # Refresh data asynchronously
-
-    # # Update session state with new data
-    # st.session_state.complaints_data = st.session_state.get("complaints_data")
-    # complaints_data = st.session_state.complaints_data  # Update the variable with the new data
 
 
 # Graphs building

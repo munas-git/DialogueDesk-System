@@ -4,10 +4,10 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 
 # others
 import asyncio
-from TelegramAgentOps import AsyncAgent
 from config import TELEGRAM_API_KEY
+from TelegramAgentOps import DialogueDeskAgent
 
-agent = AsyncAgent()
+agent = DialogueDeskAgent()
 
 # start command definition
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -32,23 +32,27 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 
 
-# Defining message handler that responds to any text
 async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    
     user_message = update.message.text
     message_date = str(update.message.date.strftime('%Y-%m-%d'))
-    print(message_date)
     user_id = str(update.effective_user.id)
+    users_first_name = str(update.effective_user.first_name)
 
     try:
         # Call the AsyncAgent's answer method to get a response
-        agent_response = await agent.answer("This is the users message:"+user_message+"This message was sent on date:"+message_date+"The users id is"+user_id)
-        
-        # Reply to the user with the agent's response
-        await update.message.reply_text(agent_response.get("output", "Oh ohh... I can't respond right now. Please try again later 🤧😷"))
+        agent_response = await agent.answer(
+            f"This is the user's message: {user_message}. "
+            f"This message was sent on date: {message_date}. "
+            f"The user's id is: {user_id}."
+            f"The users first name is {users_first_name}"
+        )
+        await update.message.reply_text(agent_response, parse_mode="HTML")
+    
     except Exception as e:
         print(f"Error: {e}")
-        await update.message.reply_text("Oh ohh... I can't respond right now. Please try again later 🤧😷")
+        await update.message.reply_text(
+            "Oh ohh... I can't respond right now. Please try again later 🤧😷"
+        )
 
 
 async def main():

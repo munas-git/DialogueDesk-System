@@ -2,7 +2,7 @@
 import pymongo
 from pymongo.server_api import ServerApi
 from pymongo.mongo_client import MongoClient
-from motor.motor_asyncio import AsyncIOMotorClient
+
 
 # others
 import re
@@ -18,13 +18,7 @@ uri = f"mongodb+srv://einsteinmuna:{MONGO_DB_PASSWORD}@dialoguedesk.gb7wh.mongod
 sync_client = MongoClient(uri, server_api=ServerApi('1'))
 DialogueDeskDB = sync_client.DialogueDeskNoSQLDb
 DialogueDeskCollection = DialogueDeskDB["Meetings_Insights"]
-# DialogueDeskMeetingsC = DialogueDeskDB["DialogueDeskComplaints"]
-
-# db and collection (async)
-async_client = AsyncIOMotorClient(uri, server_api=ServerApi('1'))
-DialogueDeskDB = async_client.DialogueDeskNoSQLDb
 DialogueDeskMeetingsC = DialogueDeskDB["DialogueDeskComplaints"]
-# DialogueDeskMeetingsC = DialogueDeskDB["DialogueDeskComplaints"]
 
 
 def upload_data(data: dict):
@@ -109,57 +103,6 @@ def search_by_date_and_id(date_id_tup: str) -> dict:
         return output
     
 
-async def create_complaints_dataframe():
-    """
-    Retrieves all complaints in chunks of 100, formats them to a DataFrame, and returns the DataFrame.
-    """
-    try:
-        # Initialize an empty list to hold complaint data
-        all_complaints = []
-
-        # Cursor to fetch complaints in chunks of 100
-        complaints_cursor = DialogueDeskMeetingsC.find()
-        
-        while True:
-            # Fetch the next chunk of complaints
-            complaints = await complaints_cursor.to_list(length=100)
-
-            # Break the loop if there are no more complaints
-            if not complaints:
-                break
-
-            # Extract relevant fields from the chunk and append them to all_complaints
-            for complaint in complaints:
-                all_complaints.append([
-                    complaint.get("complaint_text", ""),
-                    complaint.get("date", ""),
-                    complaint.get("complaint_topic_1", ""),
-                    complaint.get("complaint_topic_2", ""),
-                    complaint.get("receive_update", ""),
-                    complaint.get("status", ""),
-                ])
-
-        # Create DataFrame only if there are complaints
-        if all_complaints:
-            columns = ["complaint_text", "date", "topic_1", "topic_2", "update_preference", "complaint_status"]
-            complaints_df = pd.DataFrame(all_complaints, columns=columns)
-            return complaints_df
-        else:
-            print("No complaints found in the database... default df returned")
-            
-            columns = ["complaint_text", "date", "topic_1", "topic_2", "update_preference", "complaint_status"]
-            default_values = ["No data available"] * len(columns)
-            df_no_data = pd.DataFrame([default_values], columns=columns)
-            return df_no_data
-
-    except Exception as e:
-        print(f"An error occurred while retrieving complaints: {str(e)}")
-        columns = ["complaint_text", "date", "topic_1", "topic_2", "update_preference", "complaint_status"]
-        default_values = ["No data available"] * len(columns)
-        df_no_data = pd.DataFrame([default_values], columns=columns)
-        return df_no_data
-
-
 def get_todays_date(random):
     """
     Returns today's date in YYYY-MM-DD format.
@@ -169,65 +112,30 @@ def get_todays_date(random):
     return today.strftime("%Y-%m-%d")
 
 
-# print(get_todays_date("age"))
+def create_complaints_dataframe():
+    """
+    fetches data from database, creates and returns populated dataframe."""
+    try:
+        complaints_cursor = DialogueDeskMeetingsC.find()
+        all_complaints = []
 
+        for complaint in complaints_cursor:
+            all_complaints.append([
+                complaint.get("date", ""),
+                complaint.get("complaint_text", ""),
+                complaint.get("complaint_topic_1", ""),
+                complaint.get("complaint_topic_2", ""),
+                complaint.get("receive_update", ""),
+                complaint.get("status", ""),
+            ])
 
+        columns = ["date", "complaint_text", "topic_1", "topic_2", "update_preference", "complaint_status"]
+        
+        if all_complaints:
+            return pd.DataFrame(all_complaints, columns=columns)
+        else:
+            return pd.DataFrame([["No data available"] * len(columns)], columns=columns)
 
-
-
-
-
-
-# def create_complaints_dataframe():
-#     """
-#     Retrieves all complaints in chunks of 100, formats them to a DataFrame, and returns the DataFrame.
-#     """
-#     try:
-#         # Initialize an empty list to hold complaint data
-#         all_complaints = []
-
-#         # Cursor to fetch complaints
-#         complaints_cursor = DialogueDeskMeetingsC.find()
-
-#         # Fetch complaints in chunks of 100
-#         while True:
-#             # Fetch the next chunk of complaints
-#             complaints = list(complaints_cursor.clone().limit(100))  # Clone the cursor and apply limit
-
-#             # Break the loop if there are no more complaints
-#             if not complaints:
-#                 break
-
-#             # Extract relevant fields from the chunk and append them to all_complaints
-#             for complaint in complaints:
-#                 all_complaints.append([
-#                     complaint.get("date", ""),
-#                     complaint.get("complaint_text", ""),
-#                     complaint.get("complaint_topic_1", ""),
-#                     complaint.get("complaint_topic_2", ""),
-#                     complaint.get("receive_update", ""),
-#                     complaint.get("status", ""),
-#                 ])
-
-#         # Create DataFrame only if there are complaints
-#         if all_complaints:
-#             columns = ["date", "complaint_text", "topic_1", "topic_2", "update_preference", "complaint_status"]
-#             complaints_df = pd.DataFrame(all_complaints, columns=columns)
-#             return complaints_df
-#         else:
-#             print("No complaints found in the database... default df returned")
-
-#             # Default DataFrame when no data is available
-#             columns = ["date", "complaint_text", "topic_1", "topic_2", "update_preference", "complaint_status"]
-#             default_values = ["No data available"] * len(columns)
-#             df_no_data = pd.DataFrame([default_values], columns=columns)
-#             return df_no_data
-
-#     except Exception as e:
-#         print(f"An error occurred while retrieving complaints: {str(e)}")
-
-#         # Default DataFrame in case of an error
-#         columns = ["date", "complaint_text", "topic_1", "topic_2", "update_preference", "complaint_status"]
-#         default_values = ["No data available (exception occurred)"] * len(columns)
-#         df_no_data = pd.DataFrame([default_values], columns=columns)
-#         return df_no_data
+    except Exception as e:
+        print(f"An error occurred while retrieving complaints: {str(e)}")
+        return pd.DataFrame([["No data available (exception occurred)"] * len(columns)], columns=columns)
