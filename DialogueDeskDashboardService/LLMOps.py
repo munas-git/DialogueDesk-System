@@ -93,9 +93,10 @@ class Agent():
     def __init__(self):
         self.tools = [
             Tool(
-                name="MongoDB function to retrieve meetings day metadata",
+                name="meetings_metadata_by_date",
                 func=meetings_metadata_by_date,
                 description=(
+                    "MongoDB function to retrieve meetings day metadata"
                     "Use this tool whenever you need to find out the number of meetings held on a particular day "
                     "(no_of_meetings) or the meeting ids (meeting_ids) of meetings held on a particular day. "
                     "Input should simply be a date in year-month-day format e.g 2025-01-22. "
@@ -110,9 +111,10 @@ class Agent():
                 )
             ),
             Tool(
-                name="MongoDB function to retrieve meetings day complete data such as transcript and more",
+                name="search_by_date_and_id",
                 func=search_by_date_and_id,
                 description=(
+                    "MongoDB function to retrieve meetings day complete data such as transcript and more"
                     "Use this tool whenever you need to retrieve information and answer questions from details within "
                     "transcript, summary, key points or action items from information of a specific date and meeting id. "
                     "The function input is passed as a tuple like so for the first meeting on January 2nd of 2023:"
@@ -125,6 +127,15 @@ class Agent():
                     "action_items which is a list containing action points from the meeting."
                     "You can then work with that information to asnwer the question as necessary"
                     "If no info is returned from this tool or empty topics, just state that that information is not available"
+                )
+            ),
+            Tool(
+                name="get_todays_date",
+                func=get_todays_date,
+                description=(
+                    "This tool simply retrieves the current date and returns it in this format: YYYY-MM-DD. "
+                    "Use this whenever you need to answer questions relative to the current day, such as: "
+                    "'Was there any meeting today?', 'What was discussed in today's meeting?', etc."
                 )
             )
         ]
@@ -166,6 +177,7 @@ class Agent():
             max_retries=2,
             api_key=OPEN_AI_KEY,
         )
+        
         
         self.agent = initialize_agent(
             self.tools,

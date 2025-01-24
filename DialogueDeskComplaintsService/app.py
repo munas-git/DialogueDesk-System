@@ -3,6 +3,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
 # others
+import asyncio
 from TelegramAgentOps import AsyncAgent
 from config import TELEGRAM_API_KEY
 
@@ -33,12 +34,15 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 # Defining message handler that responds to any text
 async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    
     user_message = update.message.text
-    user_id = update.effective_user.id  # Get the user's ID (if needed)
+    message_date = str(update.message.date.strftime('%Y-%m-%d'))
+    print(message_date)
+    user_id = str(update.effective_user.id)
 
     try:
         # Call the AsyncAgent's answer method to get a response
-        agent_response = await agent.answer(user_message)
+        agent_response = await agent.answer("This is the users message:"+user_message+"This message was sent on date:"+message_date+"The users id is"+user_id)
         
         # Reply to the user with the agent's response
         await update.message.reply_text(agent_response.get("output", "Oh ohh... I can't respond right now. Please try again later 🤧😷"))
@@ -46,19 +50,25 @@ async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         print(f"Error: {e}")
         await update.message.reply_text("Oh ohh... I can't respond right now. Please try again later 🤧😷")
 
-# Main function to run the bot
-if __name__ == "__main__":
+
+async def main():
     print("Starting bot...")
-
-    # Create the application
-    app = ApplicationBuilder().token(TELEGRAM_API_KEY).build()
-
-    # Add command handlers
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("help", help_command))
-
-    # Add message handler for all text messages
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, respond))
-
+    application = ApplicationBuilder().token(TELEGRAM_API_KEY).build()
+    
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, respond))
+    
     print("Bot running...")
-    app.run_polling()
+    await application.initialize()
+    await application.start()
+    await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+    
+    # Keep the bot running until interrupted
+    try:
+        await asyncio.Event().wait()
+    finally:
+        await application.stop()
+
+if __name__ == "__main__":
+    asyncio.run(main())

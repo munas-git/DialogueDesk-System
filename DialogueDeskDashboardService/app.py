@@ -1,5 +1,3 @@
-# cool name idea: DialogueDesk
-
 import streamlit as st
 
 # Data manipulation
@@ -14,7 +12,7 @@ import matplotlib.pyplot as plt
 # Others
 import re
 import time
-import json
+import asyncio
 import datetime
 
 # LLM/Agent related
@@ -31,15 +29,31 @@ st.set_page_config(
     layout="wide"
 )
 
-# dataframe and AI Agent
-complaints_data = pd.read_csv("../dataset/student-complaints.csv")
 
 # Display mode color light/dark... might move to session state later
 bg_color = "white"
 n_grams = (2,3) # for word cloud
 
+#  Initialise session state data
 # ===================================================================================================
-# Initialise session states
+async def load_complaints_data():
+    # Load data asynchronously
+    st.session_state.complaints_data = await create_complaints_dataframe()
+
+# Function to run async code
+def run_async_function():
+    loop = asyncio.new_event_loop()  # Create a new event loop
+    asyncio.set_event_loop(loop)     # Set it as the current event loop
+    loop.run_until_complete(load_complaints_data())  # Run the async function
+
+
+# Initial load
+if st.session_state.get("complaints_data") is None:
+    run_async_function()
+
+complaints_data = st.session_state.get("complaints_data")
+
+
 if "meeting_insight_date" not in st.session_state: # Viewing insight for meating
     st.session_state.meeting_insight_date = datetime.date.today()
 
@@ -164,7 +178,8 @@ with st.sidebar:
         
 
 # KPIs
-no_of_complaints = len(complaints_data["complaint_id"])
+active_complaints = len(complaints_data[complaints_data["complaint_status"] == "pending"])
+resolved_complaints = len(complaints_data[complaints_data["complaint_status"] == "resolved"])
 
 st.title("🗣 DialogueDesk Dashboard 📊.")
 st.markdown("##")
@@ -174,9 +189,26 @@ st.markdown("##")
 first_col, second_col = st.columns(2)
 
 with first_col:
-    st.subheader(f"No. of Complaints: {no_of_complaints:,}")
+    st.subheader(f"Active Complaints: {active_complaints:,}")
+    st.subheader(f"Resolved Complaints: {resolved_complaints:,}")
 
 st.divider()
+
+
+# Button to refresh data
+if st.button("Refresh Data"):
+    run_async_function()
+    complaints_data = st.session_state.get("complaints_data")
+
+    # Create a new event loop to handle asynchronous tasks
+    # loop = asyncio.new_event_loop()  # Explicitly create a new event loop
+    # asyncio.set_event_loop(loop)     # Set it as the current event loop
+    # loop.run_until_complete(load_complaints_data())  # Refresh data asynchronously
+
+    # # Update session state with new data
+    # st.session_state.complaints_data = st.session_state.get("complaints_data")
+    # complaints_data = st.session_state.complaints_data  # Update the variable with the new data
+
 
 # Graphs building
 # Line graph of number of complaints per day
@@ -269,7 +301,7 @@ if no_of_meetings > 1:
     with meeting_id_filter:
         selected_meeting_id = st.selectbox("Select Meeting ID:", meeting_ids)
 else:
-    selected_meeting_id = "Meeting 1" ####################
+    selected_meeting_id = meeting_ids
 
 
 # Check if there is need to fetch new data [state change or meeting_date (upload date) = meeting_insight_date (selected date for insight)]

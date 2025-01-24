@@ -21,21 +21,17 @@ class AsyncAgent:
                         the complaint text, related topics, whether the user wants updates, and the current status of the complaint.
 
                     Input json input expected are as follows:
+                    date (the date of the complaint which is stated in the prompt after 'This message was sent on date:')
                     complaint_text (User's complaint or issue description)
-                    complaint_topics (a list containing two topics that describe the complaint),
+                    complaint_topic_1 (a topic that describe the complaint),
+                    complaint_topic_2 (a second topic that describe the complaint)
                     receive_update (yes or no),
                     status: (resolved or (pending)
 
                     receive update should be yes by default and status should be pending by default.
-
-                    Remember to tell the user their complaint id which is returned after succesful call of this function. 
+                    Remember to tell the user their complaint id which is returned after succesful call of this function.
                 """
-            ),
-            # Tool(
-            #     name="MongoDB function to retrieve meetings day complete data such as transcript and more",
-            #     func=self._sync_wrapper(self.async_get_meetings_data),  # Replace with your async function
-            #     description="Retrieve full meeting data including transcripts from MongoDB."
-            # )
+            )
         ]
 
         # Define a system message template (replace with your actual template)
@@ -65,6 +61,11 @@ class AsyncAgent:
         - Empathetic: Acknowledge the user's concerns and show understanding.
         - Proactive: Anticipate what the user might need and offer helpful suggestions.
         - Informative: Keep responses concise while providing all necessary details.
+
+        ***VERY IMPORTANT*
+        When lodging user complaints, it is very important to be kind and empathetic with the user explaining to them that you understand the difficulty
+        and discomfort it may have inform them that you will keep them updated on any single updates regarding their situation. also tell them that
+        they have the oprion to opt out/in of notifications regarding the issue.
         """
 
         # Initialize the LLM with asynchronous support
