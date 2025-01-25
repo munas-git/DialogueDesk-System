@@ -112,32 +112,40 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_message = update.message.text
-    message_date = str(update.message.date.strftime('%Y-%m-%d'))
     users_first_name = str(update.effective_user.first_name)
-
+    print(f"Received message from {users_first_name}: {user_message}")  # Log the input
+    
     try:
-        agent_response = agent.handle_message(f"{user_message}.", f"This message was sent on date: {message_date}. ", users_first_name)
-        agent_response = agent_response.replace("!", "\!").replace(".", "\.").replace("-", "\-")
-        await update.message.reply_text(agent_response, parse_mode="MarkdownV2")
+        agent_response = agent.handle_message(f"{user_message}.", users_first_name)
+        print(f"Generated response: {agent_response}")  # Log the output
+        await update.message.reply_text(agent_response)
     except Exception as e:
         print(f"Error in generating response: {e}")
         await update.message.reply_text("Oh ohh... I can't respond right now. Please try again later 🤧😷")
+
+
+WEBHOOK_URL = "https://dialoguedesk-system.onrender.com/webhook"
 
 async def run_bot():
     try:
         print("Starting Telegram bot...")
         application = ApplicationBuilder().token(TELEGRAM_API_KEY).build()
-
+        
         application.add_handler(CommandHandler("start", start))
         application.add_handler(CommandHandler("help", help_command))
         application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, respond))
-
-        print("Bot running...")
+        
+        print("Setting webhook...")
         await application.initialize()
         await application.start()
-        await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+        await application.updater.start_webhook(
+            listen="0.0.0.0",
+            port=int(os.environ.get("PORT", 10000)),
+            webhook_url=WEBHOOK_URL,
+        )
     except Exception as e:
         print(f"Telegram bot startup error: {e}")
+
 
 def run_flask_app():
     port = int(os.environ.get("PORT", 10000))
@@ -147,12 +155,15 @@ def run_flask_app():
 def start_telegram_bot():
     asyncio.run(run_bot())
 
+async def main():
+    loop = asyncio.get_event_loop()
+    # Run Flask app
+    flask_task = loop.run_in_executor(None, lambda: app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000))))
+    
+    # Run Telegram bot
+    bot_task = run_bot()
+
+    await asyncio.gather(flask_task, bot_task)
+
 if __name__ == "__main__":
-    flask_thread = threading.Thread(target=run_flask_app)
-    telegram_thread = threading.Thread(target=start_telegram_bot)
-
-    flask_thread.start()
-    telegram_thread.start()
-
-    flask_thread.join()
-    telegram_thread.join()
+    asyncio.run(main())
