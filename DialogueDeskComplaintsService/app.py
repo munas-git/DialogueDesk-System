@@ -84,25 +84,24 @@
 
 
 from flask import Flask
-import os  # Add this import at the top
-
+import os
+import asyncio
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
-import asyncio
 from config import TELEGRAM_API_KEY
 from TelegramAgentOps import DialogueDeskAgent
 
+# Flask application
 app = Flask(__name__)
 
-# Create the agent
+# Telegram bot setup
 agent = DialogueDeskAgent()
 
-# Start command definition
+# Bot command handlers
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     await update.message.reply_text(f"Hi {user.first_name}! 👋\nHow can I help you?")
 
-# Define the /help command
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("Available commands: ...")
 
@@ -119,8 +118,8 @@ async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         print(f"Error in generating response: {e}")
         await update.message.reply_text("Oh ohh... I can't respond right now. Please try again later 🤧😷")
 
-async def main():
-    print("Starting bot...")
+async def run_bot():
+    print("Starting Telegram bot...")
     application = ApplicationBuilder().token(TELEGRAM_API_KEY).build()
 
     application.add_handler(CommandHandler("start", start))
@@ -132,13 +131,13 @@ async def main():
     await application.start()
     await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
 
-# Flask route to keep the app alive
+# Flask route for health checks
 @app.route('/')
 def index():
     return 'Bot is running!'
 
+# Run the bot asynchronously when the script starts
 if __name__ == "__main__":
-    # Run the bot in the background
     loop = asyncio.get_event_loop()
-    loop.create_task(main())
+    loop.create_task(run_bot())  # Run the bot in the background
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
