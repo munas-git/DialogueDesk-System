@@ -86,7 +86,7 @@
 from flask import Flask
 import os
 import asyncio
-import threading
+from flask import request
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from config import TELEGRAM_API_KEY
@@ -99,7 +99,19 @@ app = Flask(__name__)
 def health_check():
     return 'Bot is running', 200
 
-# Telegram bot setup
+
+@app.route('/webhook', methods=['POST'])
+async def webhook():
+    try:
+        update = Update.de_json(request.get_json(force=True), application.bot)
+        await application.process_update(update)
+        return 'OK', 200
+    except Exception as e:
+        print(f"Webhook error: {e}")
+        return 'Error', 500
+
+
+application = ApplicationBuilder().token(TELEGRAM_API_KEY).build()
 agent = DialogueDeskAgent()
 
 # Bot command handlers
@@ -129,7 +141,6 @@ WEBHOOK_URL = "https://dialoguedesk-system.onrender.com/webhook"
 async def run_bot():
     try:
         print("Starting Telegram bot...")
-        application = ApplicationBuilder().token(TELEGRAM_API_KEY).build()
         
         application.add_handler(CommandHandler("start", start))
         application.add_handler(CommandHandler("help", help_command))
