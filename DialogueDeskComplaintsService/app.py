@@ -35,21 +35,21 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_message = update.message.text
     message_date = str(update.message.date.strftime('%Y-%m-%d'))
-    user_id = str(update.effective_user.id)
+    # user_id = str(update.effective_user.id)
     users_first_name = str(update.effective_user.first_name)
 
     try:
         # Call the AsyncAgent's answer method to get a response
-        agent_response = await agent.answer(
-            f"This is the user's message: {user_message}. "
-            f"This message was sent on date: {message_date}. "
-            f"The user's id is: {user_id}."
-            f"The users first name is {users_first_name}"
+        agent_response = agent.handle_message(
+            f"{user_message}.",
+            f"This message was sent on date: {message_date}. ",
+            users_first_name
         )
-        await update.message.reply_text(agent_response, parse_mode="HTML")
+        agent_response = agent_response.replace("!", "\!").replace(".", "\.").replace("-", "\-")
+        await update.message.reply_text(agent_response, parse_mode="MarkdownV2")
     
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error in generating response: {e}")
         await update.message.reply_text(
             "Oh ohh... I can't respond right now. Please try again later 🤧😷"
         )
