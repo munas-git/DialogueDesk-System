@@ -3,6 +3,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
 # others
+import os
 import asyncio
 from config import TELEGRAM_API_KEY
 from TelegramAgentOps import DialogueDeskAgent
@@ -63,11 +64,14 @@ async def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, respond))
     
     print("Bot running...")
+    port = int(os.environ.get('PORT', 8000))
+
     await application.initialize()
     await application.start()
     await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
-    
-    # Keep the bot running until interrupted
+
+    print(f"Running on port {port}")
+
     try:
         await asyncio.Event().wait()
     finally:
