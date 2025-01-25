@@ -31,7 +31,7 @@ st.set_page_config(
 
 # Display mode color light/dark... might move to session state later
 bg_color = "white"
-n_grams = (2,3) # for word cloud
+n_grams = (3,3) # for word cloud
 
 #  Initialise session state data
 # ===================================================================================================
@@ -222,6 +222,10 @@ complaints_ngrams = complaints_vectorizer.get_feature_names_out()
 
 # Generate n-gram frequencies
 complaints_ngram_frequencies = dict(zip(complaints_ngrams, X_complaints.toarray().sum(axis=0)))
+
+# Frequent complaints info
+# sorted_ngrams = sorted(complaints_ngram_frequencies.items(), key=lambda x: x[1], reverse=True)
+# print("N-Grame Frequency", sorted_ngrams[:15])
 
 # Generate the word cloud
 complaints_wordcloud = WordCloud(width=600, height=470, background_color=bg_color).generate_from_frequencies(complaints_ngram_frequencies)

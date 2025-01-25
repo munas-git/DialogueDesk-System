@@ -3,13 +3,14 @@ from openai import OpenAI
 from langchain_openai import ChatOpenAI
 from langchain.agents import initialize_agent, Tool
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
-from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate, PromptTemplate
+from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
 # others
 import io
 from config import *
 from MongoDBOps import *
 from typing import BinaryIO
+
 
 # silencing warnings
 import warnings
@@ -201,3 +202,8 @@ class Agent():
         except Exception as e:
             print(f"Error processing query: {str(e)}")
             return "Oh ohh... Something seems to be wrong with my head, kindly ask admin to check up on me 🤧😷"
+    
+
+def analyse_affected_users():
+    """Function checks all active complaints and messages users who's topics were brought up during just uploaded meeting."""
+    pass

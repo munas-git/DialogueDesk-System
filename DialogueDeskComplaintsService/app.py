@@ -31,7 +31,6 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     )
 
 
-
 async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_message = update.message.text
     message_date = str(update.message.date.strftime('%Y-%m-%d'))

@@ -121,6 +121,7 @@ def create_complaints_dataframe():
 
         for complaint in complaints_cursor:
             all_complaints.append([
+                complaint.get("_id", ""),
                 complaint.get("date", ""),
                 complaint.get("complaint_text", ""),
                 complaint.get("complaint_topic_1", ""),
@@ -129,7 +130,7 @@ def create_complaints_dataframe():
                 complaint.get("status", ""),
             ])
 
-        columns = ["date", "complaint_text", "topic_1", "topic_2", "update_preference", "complaint_status"]
+        columns = ["id", "date", "complaint_text", "topic_1", "topic_2", "update_preference", "complaint_status"]
         
         if all_complaints:
             return pd.DataFrame(all_complaints, columns=columns)
