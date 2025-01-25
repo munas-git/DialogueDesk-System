@@ -84,6 +84,7 @@
 
 
 from flask import Flask
+import threading
 import os
 import asyncio
 from telegram import Update
@@ -131,13 +132,19 @@ async def run_bot():
     await application.start()
     await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
 
-# Flask route for health checks
-@app.route('/')
-def index():
-    return 'Bot is running!'
+def run_flask_app():
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
 
-# Run the bot asynchronously when the script starts
+def start_telegram_bot():
+    asyncio.run(run_bot())
+
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(run_bot())  # Run the bot in the background
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    # Create threads for Flask and Telegram bot
+    flask_thread = threading.Thread(target=run_flask_app)
+    telegram_thread = threading.Thread(target=start_telegram_bot)
+
+    flask_thread.start()
+    telegram_thread.start()
+
+    flask_thread.join()
+    telegram_thread.join()
