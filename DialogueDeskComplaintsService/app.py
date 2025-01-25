@@ -84,16 +84,20 @@
 
 
 from flask import Flask
-import threading
 import os
 import asyncio
+import threading
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from config import TELEGRAM_API_KEY
 from TelegramAgentOps import DialogueDeskAgent
 
-# Flask application
 app = Flask(__name__)
+
+# Health check route
+@app.route('/')
+def health_check():
+    return 'Bot is running', 200
 
 # Telegram bot setup
 agent = DialogueDeskAgent()
@@ -120,26 +124,30 @@ async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("Oh ohh... I can't respond right now. Please try again later 🤧😷")
 
 async def run_bot():
-    print("Starting Telegram bot...")
-    application = ApplicationBuilder().token(TELEGRAM_API_KEY).build()
+    try:
+        print("Starting Telegram bot...")
+        application = ApplicationBuilder().token(TELEGRAM_API_KEY).build()
 
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, respond))
+        application.add_handler(CommandHandler("start", start))
+        application.add_handler(CommandHandler("help", help_command))
+        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, respond))
 
-    print("Bot running...")
-    await application.initialize()
-    await application.start()
-    await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+        print("Bot running...")
+        await application.initialize()
+        await application.start()
+        await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+    except Exception as e:
+        print(f"Telegram bot startup error: {e}")
 
 def run_flask_app():
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    port = int(os.environ.get("PORT", 10000))
+    print(f"Starting Flask on port {port}")
+    app.run(host="0.0.0.0", port=port)
 
 def start_telegram_bot():
     asyncio.run(run_bot())
 
 if __name__ == "__main__":
-    # Create threads for Flask and Telegram bot
     flask_thread = threading.Thread(target=run_flask_app)
     telegram_thread = threading.Thread(target=start_telegram_bot)
 
