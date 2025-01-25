@@ -1,16 +1,20 @@
-# Telegram rerlated
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+# telegram related
+from telegram import Update, Bot
+from telegram.ext import ApplicationBuilder, ContextTypes
+from TelegramAgentOps import DialogueDeskAgent
+
+# flask related
+from flask import Flask, request
 
 # others
 import os
-import asyncio
 from config import TELEGRAM_API_KEY
-from TelegramAgentOps import DialogueDeskAgent
 
+app = Flask(__name__)
 agent = DialogueDeskAgent()
+bot = Bot(token=TELEGRAM_API_KEY)
 
-# start command definition
+# Define your Telegram handlers here
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     await update.message.reply_text(
@@ -18,28 +22,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "How can I help you?"
     )
 
-# Define the /help command
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
         "Available commands:\n\n"
         "/start - Start the bot\n"
         "/help - Get help\n"
         "/make_report - Type your complaint/report\n"
-        "/report_update - Get the status update of your report (with id if multiple)\n"
-        "/cancel_notifications - Stop receiving notifications about your report progress (one or all)\n"
-        "/receive_notifications - Resume receiving notifications about your report progress (one or all)\n"
-        "\n\nBetter yet, just send me message regarding any of the above, and I'll reply!\n"
+        "/report_update - Get the status update of your report\n"
+        "/cancel_notifications - Stop receiving notifications\n"
+        "/receive_notifications - Resume receiving notifications\n"
     )
-
 
 async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_message = update.message.text
     message_date = str(update.message.date.strftime('%Y-%m-%d'))
-    # user_id = str(update.effective_user.id)
     users_first_name = str(update.effective_user.first_name)
+    print(user_message)
 
     try:
-        # Call the AsyncAgent's answer method to get a response
         agent_response = agent.handle_message(
             f"{user_message}.",
             f"This message was sent on date: {message_date}. ",
@@ -54,28 +54,22 @@ async def respond(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             "Oh ohh... I can't respond right now. Please try again later 🤧😷"
         )
 
+# Flask route for the webhook to process updates
+@app.route(f'/{TELEGRAM_API_KEY}', methods=['POST'])
+async def webhook():
+    json_update = request.get_json()
+    update = Update.de_json(json_update, bot)
+    # Use Application's process_update method to handle the update
+    await ApplicationBuilder().token(TELEGRAM_API_KEY).build().process_update(update)
+    return 'OK'
 
-async def main():
-    print("Starting bot...")
-    application = ApplicationBuilder().token(TELEGRAM_API_KEY).build()
-    
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, respond))
-    
-    print("Bot running...")
-    port = int(os.environ.get('PORT', 8000))
+# Set webhook URL
+def set_webhook():
+    webhook_url = f"https://{os.environ.get('RENDER_EXTERNAL_URL')}/{TELEGRAM_API_KEY}"
+    bot.set_webhook(url=webhook_url)
 
-    await application.initialize()
-    await application.start()
-    await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
-
-    print(f"Running on port {port}")
-
-    try:
-        await asyncio.Event().wait()
-    finally:
-        await application.stop()
-
+# Start the Flask app and webhook
 if __name__ == "__main__":
-    asyncio.run(main())
+    set_webhook()
+    # Start the Flask server on the appropriate port (Render provides this via the PORT environment variable)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8000)))
