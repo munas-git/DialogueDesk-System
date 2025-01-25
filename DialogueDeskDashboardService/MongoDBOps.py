@@ -120,6 +120,7 @@ def create_complaints_dataframe():
         all_complaints = []
 
         for complaint in complaints_cursor:
+            complaint
             all_complaints.append([
                 complaint.get("_id", ""),
                 complaint.get("date", ""),
@@ -138,5 +139,6 @@ def create_complaints_dataframe():
             return pd.DataFrame([["No data available"] * len(columns)], columns=columns)
 
     except Exception as e:
+        columns = ["id", "date", "complaint_text", "topic_1", "topic_2", "update_preference", "complaint_status"]
         print(f"An error occurred while retrieving complaints: {str(e)}")
         return pd.DataFrame([["No data available (exception occurred)"] * len(columns)], columns=columns)
