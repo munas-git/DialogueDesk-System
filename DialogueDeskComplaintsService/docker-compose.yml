@@ -13,6 +13,6 @@ services:
       - "8000:8000"
   hello_world_server:
     image: python:3.9-slim
-    command: /bin/sh -c 'echo "<h1>Hello, World</h1>" > index.html && python -m http.server 3000 --bind 0.0.0.0'
+    command: /bin/sh -c 'echo "<h1>Hello, World</h1>" > index.html && python -m http.server 80 --bind 0.0.0.0'
     ports:
-      - "3000:3000"
+      - "80:80"
