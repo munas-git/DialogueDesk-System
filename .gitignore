@@ -2,4 +2,4 @@
 test*
 *__
 .env
-SeamlessHRISMobileAppRolloutQualityAssuranceSync.-20250121_080404-MeetingRecording.txt
+docker-compose.yml
