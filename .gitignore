@@ -2,4 +2,3 @@
 test*
 *__
 .env
-docker-compose.yml
