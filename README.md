@@ -54,10 +54,10 @@ DialogueDesk is built for **businesses, teams, and organizations** looking to im
 - **Corporate Executives** 🏢 - Minimize **meeting overload** with AI-generated summaries.  
 - **Startup Ecosystems** 🚀 - Iterate quickly based on **customer feedback insights**.  
 
----
+<!-- 
 
 ## 🚀 Get Started  
 
 ### 1️⃣ **Try the System**  
 - **Telegram Bot**: [@DialogueDeskBot](https://t.me/DialogueDeskBot) *(Temporarily Down)*  
-- **Admin Dashboard**: [DialogueDesk Dashboard](https://dialoguedesk-system.streamlit.app/)
+- **Admin Dashboard**: [DialogueDesk Dashboard](https://dialoguedesk-system.streamlit.app/) -->
